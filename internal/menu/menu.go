@@ -3,7 +3,6 @@ package menu
 import (
 	"github.com/VladiTNT/terraria-ebiten/internal/global"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type Menu struct {
@@ -27,7 +26,13 @@ func (m *Menu) Update() error {
 }
 
 func (m *Menu) Draw(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, m.Message)
+	for x := 0; x < 32; x += 8 {
+		for y := 0; y < 32; y += 8 {
+			op := new(ebiten.DrawImageOptions)
+			op.GeoM.Translate(float64(x), float64(y))
+			screen.DrawImage(m.Context.Sprites.Dirt, op)
+		}
+	}
 }
 
 func (m *Menu) Jump() global.Scene {
