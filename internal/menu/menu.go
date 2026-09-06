@@ -113,6 +113,9 @@ func (m *Menu) Update() error {
 			switch m.ConnectWindow.CurrentOption {
 			// When joining a server
 			case Join:
+				// Connect to server
+				m.Context.NetEngine.Connect(m.ConnectWindow.UrlTextbox.Text)
+				// Close main menu
 				m.Alive = false
 			}
 		}
