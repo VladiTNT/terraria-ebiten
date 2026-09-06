@@ -21,6 +21,7 @@ type MenuOption int
 
 const (
 	Connect MenuOption = iota
+	Characters
 	Settings
 	Quit
 )
@@ -56,7 +57,8 @@ func New(ctx *global.Context) *Menu {
 		Options: []*ui.Label{
 			ui.NewLabel(MenuOptionX, 1*MenuOptionVerticalSpacing, "Connect"),
 			ui.NewLabel(MenuOptionX, 2*MenuOptionVerticalSpacing, "Settings"),
-			ui.NewLabel(MenuOptionX, 3*MenuOptionVerticalSpacing, "Quit"),
+			ui.NewLabel(MenuOptionX, 3*MenuOptionVerticalSpacing, "Characters"),
+			ui.NewLabel(MenuOptionX, 4*MenuOptionVerticalSpacing, "Quit"),
 		},
 		CurrentOption: Connect,
 
@@ -97,13 +99,22 @@ func (m *Menu) Update() error {
 		}
 	}
 
-	// Activate window when press enter
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) && m.CurrentWindow == NoWindow {
-		switch m.CurrentOption {
-		case Connect:
-			m.CurrentWindow = ConnWindow
-		case Quit:
-			return ebiten.Termination
+	// Pressing enter logic
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		switch m.CurrentWindow {
+		case NoWindow:
+			switch m.CurrentOption {
+			case Connect:
+				m.CurrentWindow = ConnWindow
+			case Quit:
+				return ebiten.Termination
+			}
+		case ConnWindow:
+			switch m.ConnectWindow.CurrentOption {
+			// When joining a server
+			case Join:
+				m.Alive = false
+			}
 		}
 	}
 
@@ -128,5 +139,9 @@ func (m *Menu) Draw(screen *ebiten.Image) {
 }
 
 func (m *Menu) Jump() global.Scene {
-	return nil
+	if m.Alive {
+		return nil
+	}
+
+	return NewLoadingScreen(m.Context)
 }
