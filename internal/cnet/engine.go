@@ -2,45 +2,57 @@ package cnet
 
 import (
 	"net"
-	"time"
 
 	"github.com/VladiTNT/terraria-ebiten/pkg/netutils"
+	"github.com/VladiTNT/terraria-ebiten/pkg/tproto"
 )
 
+type NetStatus int
+
 const (
-	// 60 Ticks per second
-	DefaultTickRate = time.Second / 60
+	NoConnection NetStatus = iota
+	Connecting
+	Connected
 )
 
 type Engine struct {
-	ticker *time.Ticker
-	conn   net.Conn
+	Alive     bool
+	Status    NetStatus
+	ReadChan  <-chan tproto.Packet
+	WriteChan chan<- tproto.Packet
 
-	errBuffer chan error
+	conn    net.Conn
+	errChan chan<- error
 }
 
-func NewEngine() *Engine {
+func NewEngine(errChan chan<- error) *Engine {
 	return &Engine{
-		ticker: time.NewTicker(DefaultTickRate),
-		conn:   nil,
+		Alive:     false,
+		Status:    NoConnection,
+		ReadChan:  nil,
+		WriteChan: nil,
 
-		errBuffer: make(chan error, 10),
+		conn:    nil,
+		errChan: errChan,
 	}
 }
 
 func (e *Engine) Connect(addr string) {
 	go func() {
+		e.Status = Connecting
+
 		var err error
 
 		e.conn, err = net.Dial("tcp", addr)
 		if err != nil {
-			e.errBuffer <- err
-			// Return here to prevent crash if we get an error
+			e.errChan <- err
 			return
 		}
-	}()
-}
 
-func (e *Engine) Err() []error {
-	return netutils.Drain(e.errBuffer)
+		e.Alive = true
+
+		e.ReadChan, e.WriteChan = netutils.NewSockets(e.conn, e.errChan, &e.Alive)
+
+		e.Status = Connected
+	}()
 }

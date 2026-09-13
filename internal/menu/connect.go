@@ -3,6 +3,8 @@ package menu
 import (
 	"image/color"
 
+	"github.com/VladiTNT/terraria-ebiten/internal/cnet"
+	"github.com/VladiTNT/terraria-ebiten/internal/global"
 	"github.com/VladiTNT/terraria-ebiten/pkg/txt"
 	"github.com/VladiTNT/terraria-ebiten/pkg/ui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -21,14 +23,20 @@ const (
 )
 
 type ConnectWindow struct {
+	Context *global.Context
+
 	UrlTextbox *ui.TextBox
 
 	Options       []*ui.Label
 	CurrentOption ConnectOption
+
+	LoadingAnim LoadingAnimation
 }
 
-func NewConnectWindow() *ConnectWindow {
+func NewConnectWindow(ctx *global.Context) *ConnectWindow {
 	return &ConnectWindow{
+		Context: ctx,
+
 		UrlTextbox: ui.NewTextBox(
 			MenuOptionX+WindowOffsetX+UrlInputOffsetX,
 			1*MenuOptionVerticalSpacing, 40,
@@ -38,6 +46,8 @@ func NewConnectWindow() *ConnectWindow {
 			ui.NewLabel(MenuOptionX+WindowOffsetX, 1*MenuOptionVerticalSpacing, "Url:"),
 			ui.NewLabel(MenuOptionX+WindowOffsetX, 2*MenuOptionVerticalSpacing, "Join"),
 		},
+
+		LoadingAnim: NewLoadingAnimation(),
 	}
 }
 
@@ -60,6 +70,11 @@ func (cw *ConnectWindow) Update() {
 		cw.UrlTextbox.Update()
 	}
 
+	// Update the animation when we are loading
+	if cw.Context.NetEngine.Status == cnet.Connecting {
+		cw.LoadingAnim.Update()
+	}
+
 }
 
 func (cw *ConnectWindow) Draw(screen *ebiten.Image, pp *txt.Printer) {
@@ -79,5 +94,11 @@ func (cw *ConnectWindow) Draw(screen *ebiten.Image, pp *txt.Printer) {
 		} else {
 			cw.Options[i].Draw(screen, pp, color.White)
 		}
+	}
+
+	// Print Text if we are connecting
+	if cw.Context.NetEngine.Status == cnet.Connecting {
+		pp.PrintWithPosition(screen, cw.LoadingAnim.Frames[cw.LoadingAnim.FrameCounter/30],
+			MenuOptionX+WindowOffsetX, 6*MenuOptionVerticalSpacing)
 	}
 }

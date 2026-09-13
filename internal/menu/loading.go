@@ -1,25 +1,12 @@
 package menu
 
-import (
-	"github.com/VladiTNT/terraria-ebiten/internal/global"
-	"github.com/VladiTNT/terraria-ebiten/pkg/txt"
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
-)
-
-type LoadingScreen struct {
-	Alive   bool
-	Context *global.Context
-
+type LoadingAnimation struct {
 	FrameCounter int
 	Frames       []string
 }
 
-func NewLoadingScreen(ctx *global.Context) *LoadingScreen {
-	return &LoadingScreen{
-		Alive:   true,
-		Context: ctx,
-
+func NewLoadingAnimation() LoadingAnimation {
+	return LoadingAnimation{
 		FrameCounter: 0,
 		Frames: []string{
 			"Waiting",
@@ -30,11 +17,7 @@ func NewLoadingScreen(ctx *global.Context) *LoadingScreen {
 	}
 }
 
-func (ls *LoadingScreen) Update() error {
-	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
-		ls.Alive = false
-	}
-
+func (ls *LoadingAnimation) Update() error {
 	ls.FrameCounter++
 
 	if ls.FrameCounter >= 120 {
@@ -42,16 +25,4 @@ func (ls *LoadingScreen) Update() error {
 	}
 
 	return nil
-}
-
-func (ls *LoadingScreen) Draw(screen *ebiten.Image) {
-	txt.PrintWithPosition(screen, ls.Frames[ls.FrameCounter/30], ls.Context.Font, 24, 0, 0)
-}
-
-func (ls *LoadingScreen) Jump() global.Scene {
-	if ls.Alive {
-		return nil
-	}
-
-	return New(ls.Context)
 }

@@ -3,6 +3,7 @@ package menu
 import (
 	"image/color"
 
+	"github.com/VladiTNT/terraria-ebiten/internal/cnet"
 	"github.com/VladiTNT/terraria-ebiten/internal/global"
 	"github.com/VladiTNT/terraria-ebiten/pkg/txt"
 	"github.com/VladiTNT/terraria-ebiten/pkg/ui"
@@ -63,11 +64,15 @@ func New(ctx *global.Context) *Menu {
 		CurrentOption: Connect,
 
 		CurrentWindow: NoWindow,
-		ConnectWindow: NewConnectWindow(),
+		ConnectWindow: NewConnectWindow(ctx),
 	}
 }
 
 func (m *Menu) Update() error {
+	if m.Context.NetEngine.Status == cnet.Connected {
+		m.Alive = false
+	}
+
 	// Close game only when no side window
 	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 		if m.CurrentWindow == NoWindow {
@@ -115,8 +120,6 @@ func (m *Menu) Update() error {
 			case Join:
 				// Connect to server
 				m.Context.NetEngine.Connect(m.ConnectWindow.UrlTextbox.Text)
-				// Close main menu
-				m.Alive = false
 			}
 		}
 	}
@@ -139,6 +142,7 @@ func (m *Menu) Draw(screen *ebiten.Image) {
 	case ConnWindow:
 		m.ConnectWindow.Draw(screen, m.TextEngine)
 	}
+
 }
 
 func (m *Menu) Jump() global.Scene {
@@ -146,5 +150,5 @@ func (m *Menu) Jump() global.Scene {
 		return nil
 	}
 
-	return NewLoadingScreen(m.Context)
+	return nil
 }
