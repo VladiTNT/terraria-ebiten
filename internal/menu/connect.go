@@ -95,4 +95,10 @@ func (cw *ConnectWindow) Draw(screen *ebiten.Image, pp *txt.Printer) {
 			cw.Options[i].Draw(screen, pp, color.White)
 		}
 	}
+
+	// Waiting
+	if cw.Context.NetEngine.Status == cnet.Connecting {
+		pp.PrintWithPosition(screen, cw.LoadingAnim.Frames[cw.LoadingAnim.FrameCounter/30],
+			MenuOptionX+WindowOffsetX, 3*MenuOptionVerticalSpacing)
+	}
 }

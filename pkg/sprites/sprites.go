@@ -1,4 +1,4 @@
-package global
+package sprites
 
 import (
 	"image/png"
@@ -6,16 +6,6 @@ import (
 	"github.com/VladiTNT/terraria-ebiten/assets"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-type Sprites struct {
-	Dirt *ebiten.Image
-}
-
-func NewSprites() *Sprites {
-	return &Sprites{
-		Dirt: NewSprite("images/dirt.png"),
-	}
-}
 
 func NewSprite(path string) *ebiten.Image {
 	f, err := assets.FS.Open(path)

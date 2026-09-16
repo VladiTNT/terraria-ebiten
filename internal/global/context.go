@@ -11,8 +11,7 @@ type Context struct {
 
 	NetEngine *cnet.Engine
 
-	Sprites *Sprites
-	Font    *text.GoTextFaceSource
+	Font *text.GoTextFaceSource
 }
 
 func NewContext() *Context {
@@ -23,7 +22,6 @@ func NewContext() *Context {
 
 	ctx.NetEngine = cnet.NewEngine()
 
-	ctx.Sprites = NewSprites()
 	ctx.Font = GetFont()
 
 	return ctx
