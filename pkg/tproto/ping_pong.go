@@ -1,6 +1,7 @@
 package tproto
 
 import (
+	"bytes"
 	"encoding/binary"
 )
 
@@ -9,10 +10,5 @@ func PingPongPayload(x int64) []byte {
 }
 
 func DecodePingPongPayload(buf []byte) (int64, error) {
-	var n int64
-	_, err := binary.Decode(buf, binary.BigEndian, &n)
-	if err != nil {
-		return 0, err
-	}
-	return n, nil
+	return binary.ReadVarint(bytes.NewReader(buf))
 }

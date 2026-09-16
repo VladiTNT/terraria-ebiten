@@ -1,10 +1,14 @@
 package menu
 
 import (
+	"fmt"
 	"image/color"
+	"math/rand"
 
 	"github.com/VladiTNT/terraria-ebiten/internal/cnet"
 	"github.com/VladiTNT/terraria-ebiten/internal/global"
+	"github.com/VladiTNT/terraria-ebiten/pkg/netutils"
+	"github.com/VladiTNT/terraria-ebiten/pkg/tproto"
 	"github.com/VladiTNT/terraria-ebiten/pkg/txt"
 	"github.com/VladiTNT/terraria-ebiten/pkg/ui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -46,6 +50,9 @@ type Menu struct {
 
 	CurrentWindow WindowSelect
 	ConnectWindow *ConnectWindow
+
+	n            int64
+	nFromNetwork int64
 }
 
 func New(ctx *global.Context) *Menu {
@@ -65,12 +72,28 @@ func New(ctx *global.Context) *Menu {
 
 		CurrentWindow: NoWindow,
 		ConnectWindow: NewConnectWindow(ctx),
+
+		n:            0,
+		nFromNetwork: 0,
 	}
 }
 
 func (m *Menu) Update() error {
 	if m.Context.NetEngine.Status == cnet.Connected {
 		m.Alive = false
+	}
+
+	// Updates from server
+	for _, p := range netutils.Drain(m.Context.NetEngine.ReadChan) {
+		switch p.Type {
+		case tproto.Pong:
+			n, err := tproto.DecodePingPongPayload(p.Payload)
+			if err != nil {
+				fmt.Printf("Error decoding ping-pong: %v\n", err)
+			}
+
+			m.nFromNetwork = n
+		}
 	}
 
 	// Close game only when no side window
@@ -124,6 +147,13 @@ func (m *Menu) Update() error {
 		}
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		m.n = rand.Int63()
+		fmt.Println(m.n)
+		// Send a ping
+		m.Context.NetEngine.WriteChan <- tproto.NewPacket(tproto.Ping, tproto.PingPongPayload(m.n))
+	}
+
 	return nil
 }
 
@@ -142,6 +172,9 @@ func (m *Menu) Draw(screen *ebiten.Image) {
 	case ConnWindow:
 		m.ConnectWindow.Draw(screen, m.TextEngine)
 	}
+
+	m.TextEngine.PrintWithPosition(screen, fmt.Sprintf("%d", m.n), 0, 0)
+	m.TextEngine.PrintWithPosition(screen, fmt.Sprintf("%d", m.nFromNetwork), 0, 24)
 
 }
 

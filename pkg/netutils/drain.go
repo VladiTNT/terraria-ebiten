@@ -1,6 +1,6 @@
 package netutils
 
-func Drain[T any](c chan T) []T {
+func Drain[T any](c <-chan T) []T {
 	var res []T
 L:
 	for {

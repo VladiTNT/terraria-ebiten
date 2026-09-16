@@ -19,6 +19,8 @@ type Packet struct {
 	Payload []byte
 }
 
+func NewPacket(t PacketType, buf []byte) Packet { return Packet{t, buf} }
+
 func WritePacket(w io.Writer, p Packet) error {
 	err := binary.Write(w, binary.BigEndian, p.Type)
 	if err != nil {

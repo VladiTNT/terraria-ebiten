@@ -2,15 +2,13 @@ package netutils
 
 import (
 	"bufio"
+	"fmt"
 	"net"
-	"time"
 
 	"github.com/VladiTNT/terraria-ebiten/pkg/tproto"
 )
 
-const DefaultTickRate = time.Second / 60
-
-func NewSockets(conn net.Conn, errChan chan<- error, alive *bool) (<-chan tproto.Packet, chan<- tproto.Packet) {
+func NewSockets(conn net.Conn, alive *bool) (<-chan tproto.Packet, chan<- tproto.Packet) {
 	readChan := make(chan tproto.Packet, 10)
 	writeChan := make(chan tproto.Packet, 10)
 
@@ -21,7 +19,7 @@ func NewSockets(conn net.Conn, errChan chan<- error, alive *bool) (<-chan tproto
 		for *alive {
 			p, err := tproto.ReadPacket(rd)
 			if err != nil {
-				errChan <- err
+				fmt.Printf("Error reading packet: %v\n", err)
 				*alive = false
 			}
 
@@ -31,25 +29,10 @@ func NewSockets(conn net.Conn, errChan chan<- error, alive *bool) (<-chan tproto
 
 	// Write goroutine
 	go func() {
-		wr := bufio.NewWriter(conn)
-		ticker := time.NewTicker(DefaultTickRate)
-		defer ticker.Stop()
-
 		for *alive {
-			<-ticker.C
-
-			packets := Drain(writeChan)
-			for _, p := range packets {
-				err := tproto.WritePacket(wr, p)
-				if err != nil {
-					errChan <- err
-					*alive = false
-				}
-			}
-
-			err := wr.Flush()
+			err := tproto.WritePacket(conn, <-writeChan)
 			if err != nil {
-				errChan <- err
+				fmt.Printf("Error writting packet: %v\n", err)
 				*alive = false
 			}
 		}

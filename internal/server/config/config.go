@@ -7,6 +7,8 @@ type Config struct {
 	Port int
 
 	ShutdownTime time.Duration
+
+	GameTickInterval time.Duration
 }
 
 func Default() *Config {
@@ -15,5 +17,7 @@ func Default() *Config {
 		Port: 8080,
 
 		ShutdownTime: 10 * time.Second,
+
+		GameTickInterval: time.Second / 60,
 	}
 }

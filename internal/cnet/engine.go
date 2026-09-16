@@ -1,6 +1,7 @@
 package cnet
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/VladiTNT/terraria-ebiten/pkg/netutils"
@@ -21,19 +22,17 @@ type Engine struct {
 	ReadChan  <-chan tproto.Packet
 	WriteChan chan<- tproto.Packet
 
-	conn    net.Conn
-	errChan chan<- error
+	conn net.Conn
 }
 
-func NewEngine(errChan chan<- error) *Engine {
+func NewEngine() *Engine {
 	return &Engine{
 		Alive:     false,
 		Status:    NoConnection,
 		ReadChan:  nil,
 		WriteChan: nil,
 
-		conn:    nil,
-		errChan: errChan,
+		conn: nil,
 	}
 }
 
@@ -45,13 +44,13 @@ func (e *Engine) Connect(addr string) {
 
 		e.conn, err = net.Dial("tcp", addr)
 		if err != nil {
-			e.errChan <- err
+			fmt.Printf("Error dialing %s: %v\n", addr, err)
 			return
 		}
 
 		e.Alive = true
 
-		e.ReadChan, e.WriteChan = netutils.NewSockets(e.conn, e.errChan, &e.Alive)
+		e.ReadChan, e.WriteChan = netutils.NewSockets(e.conn, &e.Alive)
 
 		e.Status = Connected
 	}()
