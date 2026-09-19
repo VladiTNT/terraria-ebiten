@@ -8,7 +8,7 @@ type Config struct {
 
 	ShutdownTime time.Duration
 
-	GameTickInterval time.Duration
+	GameSettings *Settings
 }
 
 func Default() *Config {
@@ -18,6 +18,6 @@ func Default() *Config {
 
 		ShutdownTime: 10 * time.Second,
 
-		GameTickInterval: time.Second / 60,
+		GameSettings: &Settings{},
 	}
 }

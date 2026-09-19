@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	WorldLength = 4000
-	WorldHeight = 2000
+	WorldLength = 10
+	WorldHeight = 5
 )
 
 type WorldData struct {

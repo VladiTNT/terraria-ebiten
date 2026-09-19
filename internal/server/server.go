@@ -13,6 +13,7 @@ import (
 
 type Server struct {
 	Config *config.Config
+	Game   *Game
 
 	Ln net.Listener
 	Wg sync.WaitGroup
@@ -25,6 +26,7 @@ func NewServer(cfg *config.Config) *Server {
 	}
 
 	return &Server{
+		Game:   NewGame(cfg.GameSettings),
 		Config: cfg,
 		Ln:     ln,
 	}
@@ -50,6 +52,9 @@ func (s *Server) Run(ctx context.Context) error {
 			s.Wg.Go(func() { s.handleConn(conn) })
 		}
 	}()
+
+	// Start game loop in a separate goroutine
+	go s.Game.Main()
 
 	// Waiting for context to initiate shutdown sequence.
 	<-ctx.Done()

@@ -2,9 +2,7 @@ package cnet
 
 import (
 	"fmt"
-	"math/rand"
 	"net"
-	"time"
 
 	"github.com/VladiTNT/terraria-ebiten/pkg/netutils"
 	"github.com/VladiTNT/terraria-ebiten/pkg/tproto"
@@ -49,39 +47,6 @@ func (e *Engine) Connect(addr string) {
 			fmt.Printf("Error dialing %s: %v\n", addr, err)
 			return
 		}
-
-		n := rand.Int63()
-		start := time.Now()
-		err = tproto.WritePacket(e.conn, tproto.NewPacket(tproto.Ping, tproto.PingPongPayload(n)))
-		if err != nil {
-			fmt.Printf("Error writting packet: %v\n", err)
-			e.conn.Close()
-			e.Status = NoConnection
-			return
-		}
-
-		p, err := tproto.ReadPacket(e.conn)
-		if err != nil {
-			fmt.Printf("Error reading packet: %v\n", err)
-			e.conn.Close()
-			e.Status = NoConnection
-			return
-		}
-
-		if p.Type != tproto.Pong {
-			fmt.Println("Error, didn't receive pong from server.")
-		}
-
-		newN, err := tproto.DecodePingPongPayload(p.Payload)
-		if err != nil {
-			fmt.Printf("Error decoding ping-pong: %v\n", err)
-		}
-
-		if n != newN {
-			fmt.Printf("Error, number mutated during roundtrip: %d -> %d.\n", n, newN)
-		}
-
-		fmt.Printf("Ping: %v\n", time.Since(start))
 
 		e.Alive = true
 

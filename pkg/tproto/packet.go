@@ -12,6 +12,8 @@ const (
 	Err PacketType = iota
 	Ping
 	Pong
+	WorldDataRequest
+	WorldDataResponse
 )
 
 type Packet struct {

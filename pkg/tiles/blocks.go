@@ -5,6 +5,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	BlockSideLength = 12
+)
+
 type Block uint8
 
 const (
