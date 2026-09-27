@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	WorldLength = 10
-	WorldHeight = 5
+	WorldLength uint64 = 40
+	WorldHeight uint64 = 20
 )
 
 type WorldData struct {

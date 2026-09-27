@@ -36,6 +36,7 @@ func (w *World) Update() error {
 		}
 	}
 
+	// Fetch world from server if it isn't good
 	if !w.WorldIsGood {
 		w.Context.NetEngine.WriteChan <- tproto.NewPacket(tproto.WorldDataRequest, []byte{})
 	}

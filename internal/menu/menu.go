@@ -6,8 +6,6 @@ import (
 	"github.com/VladiTNT/terraria-ebiten/internal/cnet"
 	"github.com/VladiTNT/terraria-ebiten/internal/game"
 	"github.com/VladiTNT/terraria-ebiten/internal/global"
-	"github.com/VladiTNT/terraria-ebiten/pkg/netutils"
-	"github.com/VladiTNT/terraria-ebiten/pkg/tproto"
 	"github.com/VladiTNT/terraria-ebiten/pkg/txt"
 	"github.com/VladiTNT/terraria-ebiten/pkg/ui"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -75,14 +73,6 @@ func (m *Menu) Update() error {
 	// When we are connected we can jump to the next scene.
 	if m.Context.NetEngine.Status == cnet.Connected {
 		m.Alive = false
-	}
-
-	// Updates from server
-	for _, p := range netutils.Drain(m.Context.NetEngine.ReadChan) {
-		switch p.Type {
-		case tproto.Pong:
-
-		}
 	}
 
 	// Close game only when no side window

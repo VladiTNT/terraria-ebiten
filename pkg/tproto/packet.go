@@ -14,6 +14,8 @@ const (
 	Pong
 	WorldDataRequest
 	WorldDataResponse
+	BlockChangePush
+	BlockChangeReceive
 )
 
 type Packet struct {
